@@ -1,35 +1,9 @@
 import numpy as np
 
-from enum import IntEnum
-
 from gym import Env, error, spaces, utils
 from gym.utils import seeding
 
-class Street(IntEnum):
-    PREFLOP = 0
-    FLOP = 1
-    SHOWDOWN = 2
-
-class Move(IntEnum):
-    CHECK = 0
-    CALL = 1
-    RAISE = 2
-    FOLD = 3
-
-class State(IntEnum):
-    CARD = 0
-    BOARD = 1
-    POT = 2
-    TO_CALL = 3
-    TO_ACT_POS = 4
-    BUTTON = 5
-    STREET = 6
-
-class Card(IntEnum):
-    JACK = 0
-    QUEEN = 1
-    KING = 2
-    BLANK = 3
+from leduc.util import Street, Move, State, Card
 
 class Player():
     def __init__(self):
@@ -62,16 +36,7 @@ class LeducEnv(Env):
         self._deck = Deck()
         self._board = Card.BLANK
 
-        self.observation_space = spaces.Tuple([
-            spaces.Discrete(3),                  # card
-            spaces.Discrete(4),                  # board
-            spaces.Discrete(27),                 # pot
-            spaces.Discrete(5),                  # to call
-            spaces.Discrete(2),                  # to act seat
-            spaces.Discrete(2),                  # button
-            spaces.Discrete(3),                  # street
-        ])
-
+        self.observation_space = spaces.MultiDiscrete([3, 4, 27, 5, 2, 2, 3])
         self.action_space = spaces.Discrete(4)
 
     def reset(self):

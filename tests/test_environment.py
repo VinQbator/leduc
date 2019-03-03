@@ -1,9 +1,11 @@
 import gym
 import pytest
 
+import numpy as np
 from gym import error
 
 from leduc.environment import LeducEnv, State, Street, Card, Move
+from leduc.util import get_safe_action
 
 def test_check_folding():
     env = _create_env()
@@ -162,6 +164,19 @@ def test_showdown():
     assert s[State.CARD] in [Card.JACK, Card.QUEEN, Card.KING]
     assert env._players[0].stack == -1 and env._players[1].stack == -1
 
+def test_safe_actions():
+    env = _create_env()
+    i = 0
+    done = True
+    state = None
+    while i < 1000:
+        i += 1
+        if done:
+            state = env.reset()
+        state, _, done, _ = env.step(get_safe_action(state, np.random.randint(0, 4)))
 
+
+
+# Private methods
 def _create_env():
     return gym.make('Leduc-v0')
