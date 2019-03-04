@@ -12,11 +12,11 @@ class Move(IntEnum):
     FOLD = 3
 
 class State(IntEnum):
-    CARD = 0
-    BOARD = 1
-    POT = 2
-    TO_CALL = 3
-    TO_ACT_POS = 4
+    TO_ACT_POS = 0
+    CARD = 1
+    BOARD = 2
+    POT = 3
+    TO_CALL = 4
     BUTTON = 5
     STREET = 6
 
@@ -32,8 +32,8 @@ def get_safe_action(state, action):
     Changes to best fitting action if current one not valid.
     """
 
-    street = state[State.STREET]
-    to_call = state[State.TO_CALL]
+    street = state['state'][State.STREET]
+    to_call = state['state'][State.TO_CALL]
 
     if action == Move.CHECK:
         if to_call != 0:
@@ -42,8 +42,9 @@ def get_safe_action(state, action):
         if to_call == 0:
             return Move.CHECK
     elif action == Move.RAISE:
-        if to_call == 2 * (2 if street == Street.PREFLOP else 4):
+        if to_call >= 2 * (2 if street == Street.PREFLOP else 4):
             return Move.CALL
     elif action == Move.FOLD:
         if to_call == 0:
             return Move.CHECK
+    return action

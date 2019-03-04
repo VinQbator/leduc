@@ -11,6 +11,7 @@ def test_check_folding():
     env = _create_env()
     assert not env is None
     s = env.reset()
+    s = s['state']
     assert s[State.BOARD] == Card.BLANK
     assert s[State.BUTTON] == 0
     assert s[State.POT] == 2
@@ -22,6 +23,7 @@ def test_check_folding():
 
     # BTN check
     s, r, d, i = env.step(Move.CHECK)
+    s = s['state']
     assert r == [0, 0]
     assert d == False
     assert s[State.BOARD] == Card.BLANK
@@ -35,6 +37,7 @@ def test_check_folding():
 
     # BB bet
     s, r, d, i = env.step(Move.RAISE)
+    s = s['state']
     assert r == [0, 0]
     assert d == False
     assert s[State.BOARD] == Card.BLANK
@@ -48,6 +51,7 @@ def test_check_folding():
 
     # BTN fold
     s, r, d, i = env.step(Move.FOLD)
+    s = s['state']
     assert r == [-1, 1]
     assert d == True
     assert s[State.BOARD] == Card.BLANK
@@ -60,6 +64,7 @@ def test_check_folding():
     assert env._players[0].stack == -1 and env._players[1].stack == 1
 
     s = env.reset()
+    s = s['state']
     assert s[State.BOARD] == Card.BLANK
     assert s[State.BUTTON] == 1
     assert s[State.POT] == 2
@@ -73,6 +78,7 @@ def test_showdown():
     env = _create_env()
     assert not env is None
     s = env.reset()
+    s = s['state']
     assert s[State.BOARD] == Card.BLANK
     assert s[State.BUTTON] == 0
     assert s[State.POT] == 2
@@ -84,6 +90,7 @@ def test_showdown():
 
     # BTN bet
     s, r, d, i = env.step(Move.RAISE)
+    s = s['state']
     assert r == [0, 0]
     assert d == False
     assert s[State.BOARD] == Card.BLANK
@@ -97,6 +104,7 @@ def test_showdown():
 
     # BB call
     s, r, d, i = env.step(Move.CALL)
+    s = s['state']
     assert r == [0, 0]
     assert d == False
     assert s[State.BOARD] in [Card.JACK, Card.QUEEN, Card.KING]
@@ -110,6 +118,7 @@ def test_showdown():
 
     # BB bet
     s, r, d, i = env.step(Move.RAISE)
+    s = s['state']
     assert r ==  [0, 0]
     assert d == False
     assert s[State.BOARD] in [Card.JACK, Card.QUEEN, Card.KING]
@@ -123,6 +132,7 @@ def test_showdown():
 
     # BTN raise
     s, r, d, i = env.step(Move.RAISE)
+    s = s['state']
     assert r == [0, 0]
     assert d == False
     assert s[State.BOARD] in [Card.JACK, Card.QUEEN, Card.KING]
@@ -136,6 +146,7 @@ def test_showdown():
 
     # BB call
     s, r, d, i = env.step(Move.CALL)
+    s = s['state']
     assert sum(r) == 0
     assert d == True
     assert s[State.BOARD] in [Card.JACK, Card.QUEEN, Card.KING]
@@ -155,6 +166,7 @@ def test_showdown():
     assert exception_raised
 
     s = env.reset()
+    s = s['state']
     assert s[State.BOARD] == Card.BLANK
     assert s[State.BUTTON] == 1
     assert s[State.POT] == 2

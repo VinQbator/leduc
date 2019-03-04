@@ -3,7 +3,7 @@ import numpy as np
 from gym import Env, error, spaces, utils
 from gym.utils import seeding
 
-from leduc.util import Street, Move, State, Card
+from leduc.util import Street, Move, State, Card, get_safe_action
 
 class Player():
     def __init__(self):
@@ -27,7 +27,7 @@ class Deck():
         return card[0]
 
 class LeducEnv(Env):
-    def __init__(self):
+    def __init__(self, safe_actions=True):
         self._button = -1
         self._players = [Player(), Player()]
         self._street = Street.PREFLOP
@@ -35,8 +35,21 @@ class LeducEnv(Env):
         self._to_call = 0
         self._deck = Deck()
         self._board = Card.BLANK
+        self._safe_actions = safe_actions
 
-        self.observation_space = spaces.MultiDiscrete([3, 4, 27, 5, 2, 2, 3])
+        self.observation_space = spaces.Dict({
+            'to_act': spaces.Discrete(2),
+            'state': spaces.Tuple([
+                spaces.Discrete(2),                  # to act seat
+                spaces.Discrete(3),                  # card
+                spaces.Discrete(4),                  # board
+                spaces.Discrete(27),                 # pot
+                spaces.Discrete(9),                  # to call
+                spaces.Discrete(2),                  # button
+                spaces.Discrete(3),                  # street
+            ])
+        })
+        
         self.action_space = spaces.Discrete(4)
 
     def reset(self):
@@ -56,6 +69,9 @@ class LeducEnv(Env):
     def step(self, action):
         if not self._street < Street.SHOWDOWN:
             raise error.Error('Reset the environment after hand ended!')
+
+        if self._safe_actions:
+            action = get_safe_action(self._state, action)
 
         street_done = False
         if action == Move.CHECK:
@@ -120,7 +136,17 @@ class LeducEnv(Env):
 
     @property
     def _state(self):
-        return (int(self._current_player.card), int(self._board), self._pot, self._to_call, self._to_act, self._button, int(self._street))
+        return {'to_act': int(self._to_act),
+                'state': (
+                    int(self._to_act), 
+                    int(self._current_player.card), 
+                    int(self._board), 
+                    int(self._pot), 
+                    int(self._to_call), 
+                    int(self._button), 
+                    int(self._street)
+                    )
+                }
 
     def _showdown(self):
         winning_hand = max([self._evaluate_hand(p.card) for p in self._players])
