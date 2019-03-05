@@ -64,7 +64,7 @@ class LeducEnv(Env):
         self._pot = 2
         self._to_call = 0
         
-        return self._state
+        return self._full_state
 
     def step(self, action):
         if not self._street < Street.SHOWDOWN:
@@ -116,12 +116,12 @@ class LeducEnv(Env):
         
         reward = [0, 0]
         if self._street == Street.SHOWDOWN:
-            reward = [p.stack for p in self._players]
+            reward = [int(p.stack) for p in self._players]
         state = self._state
         info = {}
         done = self._street == Street.SHOWDOWN
 
-        return state, reward, done, info
+        return self._full_state, reward, done, info
 
     def render(self):
         print('Board %s, Pot, %s, To Call %s, Next To Act %s' % (self._board, self._pot, self._to_call, self._to_act))
@@ -136,17 +136,19 @@ class LeducEnv(Env):
 
     @property
     def _state(self):
-        return {'to_act': int(self._to_act),
-                'state': (
-                    int(self._to_act), 
-                    int(self._current_player.card), 
-                    int(self._board), 
-                    int(self._pot), 
-                    int(self._to_call), 
-                    int(self._button), 
-                    int(self._street)
-                    )
-                }
+        return (
+                int(self._to_act), 
+                int(self._current_player.card), 
+                int(self._board), 
+                int(self._pot), 
+                int(self._to_call), 
+                int(self._button), 
+                int(self._street)
+            )
+
+    @property
+    def _full_state(self):
+        return {'to_act': int(self._to_act), 'state': self._state}
 
     def _showdown(self):
         winning_hand = max([self._evaluate_hand(p.card) for p in self._players])

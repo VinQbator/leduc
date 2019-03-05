@@ -185,10 +185,10 @@ def test_safe_actions():
         i += 1
         if done:
             state = env.reset()
-        state, _, done, _ = env.step(get_safe_action(state, np.random.randint(0, 4)))
+        state, _, done, _ = env.step(get_safe_action(state['state'], np.random.randint(0, 4)))
 
 
 
 # Private methods
 def _create_env():
-    return gym.make('Leduc-v0')
+    return gym.make('Leduc-v0', safe_actions=False)

@@ -32,8 +32,8 @@ def get_safe_action(state, action):
     Changes to best fitting action if current one not valid.
     """
 
-    street = state['state'][State.STREET]
-    to_call = state['state'][State.TO_CALL]
+    street = state[State.STREET]
+    to_call = state[State.TO_CALL]
 
     if action == Move.CHECK:
         if to_call != 0:
