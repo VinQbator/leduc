@@ -1,23 +1,24 @@
 import numpy as np
 
-from gym import Env, error, spaces, utils
-from gym.utils import seeding
+from gym import Env, error, spaces
 
-from leduc.util import Street, Move, State, Card, get_safe_action
+from leduc.util import Street, Move, Card, get_safe_action
 
-class Player():
+
+class Player:
     def __init__(self):
         self.stack = 0
         self.card = None
-    
+
     def reset(self, card):
         self.stack = -1
         self.card = card
 
-class Deck():
+
+class Deck:
     def __init__(self):
         self.reset()
-    
+
     def reset(self):
         self._cards = [Card.JACK, Card.JACK, Card.QUEEN, Card.QUEEN, Card.KING, Card.KING]
 
@@ -25,6 +26,7 @@ class Deck():
         card = np.random.choice(self._cards, 1)
         self._cards.remove(card)
         return card[0]
+
 
 class LeducEnv(Env):
     def __init__(self, safe_actions=True):
@@ -37,19 +39,22 @@ class LeducEnv(Env):
         self._board = Card.BLANK
         self._safe_actions = safe_actions
 
-        self.observation_space = spaces.Dict({
-            'to_act': spaces.Discrete(2),
-            'state': spaces.Tuple([
-                spaces.Discrete(2),                  # to act seat
-                spaces.Discrete(3),                  # card
-                spaces.Discrete(4),                  # board
-                spaces.Discrete(27),                 # pot
-                spaces.Discrete(9),                  # to call
-                spaces.Discrete(2),                  # button
-                spaces.Discrete(3),                  # street
-            ])
-        })
-        
+        self.observation_space = spaces.Dict(
+            {
+                "to_act": spaces.Discrete(2),  # to act seat
+                "state": spaces.Tuple(
+                    [
+                        spaces.Discrete(3),  # card
+                        spaces.Discrete(4),  # board
+                        spaces.Discrete(27),  # pot
+                        spaces.Discrete(9),  # to call
+                        spaces.Discrete(2),  # button
+                        spaces.Discrete(3),  # street
+                    ]
+                ),
+            }
+        )
+
         self.action_space = spaces.Discrete(4)
 
     def reset(self):
@@ -63,12 +68,12 @@ class LeducEnv(Env):
         self._board = Card.BLANK
         self._pot = 2
         self._to_call = 0
-        
+
         return self._full_state
 
     def step(self, action):
         if not self._street < Street.SHOWDOWN:
-            raise error.Error('Reset the environment after hand ended!')
+            raise error.Error("Reset the environment after hand ended!")
 
         if self._safe_actions:
             action = get_safe_action(self._state, action)
@@ -76,8 +81,9 @@ class LeducEnv(Env):
         street_done = False
         if action == Move.CHECK:
             assert self._to_call == 0
-            if (self._street == Street.PREFLOP and self._to_act != self._button)\
-                or (self._street == Street.FLOP and self._to_act == self._button):
+            if (self._street == Street.PREFLOP and self._to_act != self._button) or (
+                self._street == Street.FLOP and self._to_act == self._button
+            ):
                 street_done = True
         elif action == Move.CALL:
             assert self._to_call > 0
@@ -111,23 +117,23 @@ class LeducEnv(Env):
                 for p in winners:
                     p.stack += prize
             else:
-                raise Exception('Should never happen')
+                raise Exception("Should never happen")
             self._to_call = 0
-        
+
         reward = [0, 0]
         if self._street == Street.SHOWDOWN:
             reward = [int(p.stack) for p in self._players]
-        state = self._state
+        # state = self._state
         info = {}
         done = self._street == Street.SHOWDOWN
 
         return self._full_state, reward, done, info
 
     def render(self):
-        print('Board %s, Pot, %s, To Call %s, Next To Act %s' % (self._board, self._pot, self._to_call, self._to_act))
+        print("Board %s, Pot, %s, To Call %s, Next To Act %s" % (self._board, self._pot, self._to_call, self._to_act))
         i = 0
         for p in self._players:
-            print('Player %s, Card %s, Total Bet %s' % (str(i), str(p.card), str(-p.stack)))
+            print("Player %s, Card %s, Total Bet %s" % (str(i), str(p.card), str(-p.stack)))
             i += 1
 
     @property
@@ -137,18 +143,17 @@ class LeducEnv(Env):
     @property
     def _state(self):
         return (
-                int(self._to_act), 
-                int(self._current_player.card), 
-                int(self._board), 
-                int(self._pot), 
-                int(self._to_call), 
-                int(self._button), 
-                int(self._street)
-            )
+            int(self._current_player.card),
+            int(self._board),
+            int(self._pot),
+            int(self._to_call),
+            int(self._button),
+            int(self._street),
+        )
 
     @property
     def _full_state(self):
-        return {'to_act': int(self._to_act), 'state': self._state}
+        return {"to_act": int(self._to_act), "state": self._state}
 
     def _showdown(self):
         winning_hand = max([self._evaluate_hand(p.card) for p in self._players])

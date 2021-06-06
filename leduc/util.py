@@ -1,9 +1,11 @@
 from enum import IntEnum
 
+
 class Street(IntEnum):
     PREFLOP = 0
     FLOP = 1
     SHOWDOWN = 2
+
 
 class Move(IntEnum):
     CHECK = 0
@@ -11,20 +13,22 @@ class Move(IntEnum):
     RAISE = 2
     FOLD = 3
 
+
 class State(IntEnum):
-    TO_ACT_POS = 0
-    CARD = 1
-    BOARD = 2
-    POT = 3
-    TO_CALL = 4
-    BUTTON = 5
-    STREET = 6
+    CARD = 0
+    BOARD = 1
+    POT = 2
+    TO_CALL = 3
+    BUTTON = 4
+    STREET = 5
+
 
 class Card(IntEnum):
     JACK = 0
     QUEEN = 1
     KING = 2
     BLANK = 3
+
 
 def get_safe_action(state, action):
     """
